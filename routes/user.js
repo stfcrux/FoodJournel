@@ -1,77 +1,100 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
 const alertMessage = require('../helpers/messenger');
+const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 
-router.post('/login', (req, res, next) => {
-    passport.authenticate('local', {
-        successRedirect:'/food/listFood',
-        failureRedirect: '/showLogin',
-        failureFlash: true
-    })(req, res, next);
-});
 
+//User register URL using HTTP post => /user/register
 router.post('/register', (req, res) => {
-    let errors = []
+    let errors = [];
     let success_msg = '';
 
-    let password = req.body.password; //getting values from HTML in /register
+    //take the passwords from the user
+    let password = req.body.password;
     let password2 = req.body.password2;
     let age = req.body.age;
     let name = req.body.name;
     let email = req.body.email;
 
-    if (password !== password2) { //making sure password and password2 match
-        errors.push({ text: 'Passwords do not match!' });//if error is true, errors array increases
+
+    if (password != password2) {
+        errors.push({ text: 'Passwords do not match' }) // to add to an array, use .push()
+
     }
-    if (password.length < 4) { //making sure password has at least 4 
-        errors.push({ text: 'Password, must be at least 4 characters' });//if error is true, errors array increases
+
+    if (password.length < 4) {
+        errors.push({ text: 'Password must be at least 4 characters long' })
     }
+
     if (errors.length > 0) {
+
         res.render('user/register', {
             errors: errors,
             name: name,
-            age:age,
             email: email,
+            age: age,
             password: password,
             password2: password2
-        })
+        });
+
     } else {
-        // success_msg =`${email} registered successfully`;
+
+        //select TOP(1) from user where email = 'abc@abc.com'
+        User.findOne({ where: { email: req.body.email } })
+            .then(user => {
+                if (user) {
+                    // if user is found, that means email has already been registered
+                    res.render('user/register', {
+                        error: user.email + ' already registered',
+                        name,
+                        email,
+                        age,
+                        password,
+                        password2
+                    }
+                    )
+                } else {
+
+                    // using bcryptjs libary to hash the password
+                    // hash the password when the current email is not registered and before creating the user record
+                    bcrypt.genSalt(10, (err, salt) => {
+                        bcrypt.hash(password, salt, (err, hash) => {
+                            if (err) throw err;
+                            password = hash;
+
+                            // create a record in the data base
+                            // insert into user (name,email,password) values (?,?,?)
+                            User.create({ name, email, password }).then(user => {
+                                alertMessage(res, 'success', user.name + 'added. Please Login', 'fas fa-sign-in-alt', true);
+                                res.redirect('/showLogin');
+                            }).catch(err => console.log(err));
+
+                        })
+
+                    })
+
+                }
+            });
+        // success_msg = `${email} resgistered successfully`; // ${} will show the keyed in value from the user must use `
         // res.render('user/login',{
         //     success_msg: success_msg
         // })
-
-        User.findOne({ where: { email: email } }).then(user => {
-            if (user) {
-                res.render('user/register', {
-                    error: user.email + ' already registered',
-                    name,
-                    age,
-                    email,
-                    password,
-                    password2
-                });
-            } else {
-
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(password, salt, (err, hash) => {
-                        if (err) throw err;
-                        password = hash;
-                        User.create({ name, email, age, password }) //creating record in the database
-                            .then(user => {
-                                alertMessage(res, 'success', user.name + ' added. Please login.', 'fas fa-sign-in-alt', true);
-                                res.redirect('/showLogin');
-                            })
-                            .catch(err = console.log(err));
-                    })
-                })
-
-            }
-        }); //select top(1) from user email
     }
 
 });
+
+
+
+
+router.post('/login', (req,res,next) => {
+    passport.authenticate('local',{
+        successRedirect: '/food/listFood',
+        failureRedirect: '/showLogin',
+        failureFlash: true
+    })(req,res,next);
+
+});
+
 module.exports = router;
