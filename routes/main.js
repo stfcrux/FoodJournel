@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const alertMessage = require('../helpers/messenger');
 
 
 router.get('/', (req, res) => {
@@ -8,29 +9,39 @@ router.get('/', (req, res) => {
 });
 
 router.get('/showLogin', (req, res) => {
-	res.render('user/login') // renders user/login.handlebars
+	res.render('user/login') // renders views/users/login.handlebars
 });
 
 router.get('/showRegister', (req, res) => {
-	res.render('user/register') // renders user/register.handlebars
+	res.render('user/register') // renders views/users/register.handlebars
 });
 
 router.get('/about', (req, res) => {
-	const author = 'Mohamad Nurridhwan';
-	// let success_msg = 'Success Message';
-	// let error_msg = 'Error message using error_msg';
-	// let errors = [{text: 'First error message'}, //{{text}} is the key as used in error.handlebars
-	// 			  {text:'Second error message'}, 
-	// 			  {text: 'Third error message'}]
-	// alertMessage(res, 'success','This is an important message','fas fa-sign-in-alt', true);
-	// alertMessage(res, 'danger','Unauthorised access','fas fa-exclamation-circle', false);
+	const author = 'Jin wei';
+	const version = '1.0.1'; 
 
-	 res.render('about', {author: author//	,
-				// success_msg: success_msg,
-				// error_msg: error_msg,
-				// errors:errors
-			}) // renders user/register.handlebars
+	alertMessage(res,'success','This is an important message','fas fa-sign-in-alt',true);
+	alertMessage(res, 'danger', 'Unauthorised access', 'fas fa-exclamation-circle',false);
+
+	let success_msg = "Success Msg"
+	let error_msg = "error Message using error_msg"
+	
+	
+	let errors = [
+					{text: "first error msg"}, // does not have to be called text, its just the key
+					{text: "Second error msg"},
+					{text: "Third error msg"}
+				];
+
+	res.render('about', {
+		author:author,
+		version:version,
+		// success_msg:success_msg,
+		// error_msg:error_msg,
+		// errors: errors
+	});
 });
+
 
 // Logout User
 router.get('/logout', (req, res) => {

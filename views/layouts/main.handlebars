@@ -38,9 +38,9 @@
 <body>
 	{{>_navbar}}
 	<div class="container">
-		{{> _flashmsg}}
-		{{>_msg}}
-		{{>_errors}}
+		{{> _flashmsg}} {{!--using flash messenger --}}
+		{{> _msg}} {{!-- views/partials/_msg.handlebars using connect flash --}}
+		{{> _errors}} {{!-- views/partials/_errors.handlebars using connect flash--}} 
 		{{{body}}}
 	</div>
 
