@@ -1,24 +1,19 @@
 const Sequelize = require('sequelize');
 const db = require('../config/DBConfig');
 
-
-// creating a Video table in MYSQL data base with the below entries
 const Food = db.define('food', {
     entry: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(2000)
     },
-
-    dateOfEntry: {
+    dateEntry: {
         type: Sequelize.DATE
     },
-
     cuisine: {
         type: Sequelize.STRING
     },
     diningPlace: {
         type: Sequelize.STRING
     },
-
     mealType: {
         type: Sequelize.STRING
     },
@@ -27,8 +22,7 @@ const Food = db.define('food', {
     },
     mood: {
         type: Sequelize.STRING
-    }
-
+    },
 });
 
 module.exports = Food;
